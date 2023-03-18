@@ -1,37 +1,30 @@
-import { useAuthContext } from '@/context/AuthContext/AuthContext'
-import {
-  TextInput,
-  PasswordInput,
-  Checkbox,
-  Anchor,
-  Paper,
-  Title,
-  Text,
-  Container,
-  Group,
-  Button,
-  Stack
-} from '@mantine/core'
-import { Link, Navigate } from 'react-router-dom'
-import GoogleIcon from '@/assets/googleIcon'
-import { login, loginGoogle } from '@/firebase/authenticate'
+import { TextInput, PasswordInput, Paper, Title, Text, Container, Button, Stack } from '@mantine/core'
+import { Link, useNavigate } from 'react-router-dom'
+import { register } from '@/firebase/authenticate'
 import { useEffect, useState } from 'react'
 import { debounce } from 'lodash'
 import ErrorModal from '@/components/errorModal'
-import { REGISTER_PATH } from '@/constants/routes'
+import { LOGIN_PATH } from '@/constants/routes'
 
-interface UserAccountProps {
-  email: string
-  password: string
-}
-const LoginPage = () => {
+const RegisterPage = () => {
+  const navigate = useNavigate()
   const [userEmail, setUserEmail] = useState<string>('')
   const [userPassword, setUserPassword] = useState<string>('')
+  const [userConfirmPassword, setUserConfirmPassword] = useState<string>('')
+
   const [errorMessage, setErrorMessage] = useState<string>('')
   const [opened, setOpened] = useState<boolean>(false)
 
-  const handleLoginWithGoogle = () => loginGoogle()
-  const handleLoginWithEmail = () => login({ email: userEmail, password: userPassword })
+  const handleRegister = () => {
+    if (!userPassword.localeCompare(userConfirmPassword)) {
+      setErrorMessage('')
+      register({ email: userEmail, password: userPassword }, setErrorMessage)
+      setErrorMessage('Registered successfully')
+      navigate(LOGIN_PATH)
+    } else {
+      setErrorMessage('Confirm password is not valid')
+    }
+  }
 
   const handleEmailChange = debounce((event: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target
@@ -43,18 +36,20 @@ const LoginPage = () => {
     setUserPassword(value)
   }, 500)
 
-  console.log('user', userEmail)
-  console.log('password', userPassword)
+  const handleConfirmPasswordChange = debounce((event: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = event.target
+    setUserConfirmPassword(value)
+  }, 500)
+
+  console.log('error', errorMessage)
+  console.log('user', userPassword)
+  console.log('user', userConfirmPassword)
 
   useEffect(() => {
     if (errorMessage) {
       setOpened(true)
     }
   }, [errorMessage])
-
-  if (localStorage.getItem('accessToken')) {
-    return <Navigate to='/' />
-  }
 
   return (
     <Container size={420} my={40}>
@@ -66,23 +61,21 @@ const LoginPage = () => {
           fontWeight: 900
         })}
       >
-        Welcome to Note App
+        Register Account
       </Title>
       <Text color='dimmed' size='sm' align='center' mt={5}>
-        Do not have an account yet?{' '}
-        <Link to={REGISTER_PATH} replace={true}>
-          Create account
-        </Link>
+        Do not have an account yet? <Link to={LOGIN_PATH}>Already have an count</Link>
       </Text>
 
       <Paper withBorder shadow='md' p={30} mt={30} radius='md'>
         <TextInput
           label='Email'
-          placeholder='example.account@gmail.com'
+          placeholder='you@mantine.dev'
           required
           onChange={handleEmailChange}
           name='email'
           // eslint-disable-next-line jsx-a11y/no-autofocus
+          autoFocus={true}
         />
         <PasswordInput
           label='Password'
@@ -91,20 +84,19 @@ const LoginPage = () => {
           mt='md'
           onChange={handlePasswordChange}
           name='password'
+        />
+        <PasswordInput
+          label='Confirm Password'
+          placeholder='Your password'
+          required
+          mt='md'
+          onChange={handleConfirmPasswordChange}
+          name='password'
           error={errorMessage}
         />
-        <Group position='apart' mt='lg'>
-          <Checkbox label='Remember me' sx={{ lineHeight: 1 }} />
-          <Anchor<'a'> onClick={(event) => event.preventDefault()} href='#' size='sm'>
-            Forgot password?
-          </Anchor>
-        </Group>
         <Stack spacing={10}>
-          <Button fullWidth mt='xl' onClick={handleLoginWithEmail}>
-            Sign in
-          </Button>
-          <Button fullWidth leftIcon={<GoogleIcon />} variant='outline' onClick={handleLoginWithGoogle}>
-            Countinue with Google
+          <Button fullWidth mt='xl' onClick={handleRegister}>
+            Create Account
           </Button>
         </Stack>
       </Paper>
@@ -112,4 +104,4 @@ const LoginPage = () => {
   )
 }
 
-export default LoginPage
+export default RegisterPage

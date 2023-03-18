@@ -1,4 +1,4 @@
-import { Center, Grid, Paper, Text } from '@mantine/core'
+import { Center, Grid, Paper } from '@mantine/core'
 import React from 'react'
 import FolderList from '@/components/folder'
 const mock = [
