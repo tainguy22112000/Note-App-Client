@@ -1,4 +1,3 @@
-import { useAuthContext } from '@/context/AuthContext/AuthContext'
 import {
   TextInput,
   PasswordInput,
@@ -15,23 +14,22 @@ import {
 import { Link, Navigate } from 'react-router-dom'
 import GoogleIcon from '@/assets/googleIcon'
 import { login, loginGoogle } from '@/firebase/authenticate'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { debounce } from 'lodash'
-import ErrorModal from '@/components/errorModal'
 import { REGISTER_PATH } from '@/constants/routes'
 
-interface UserAccountProps {
-  email: string
-  password: string
-}
 const LoginPage = () => {
   const [userEmail, setUserEmail] = useState<string>('')
   const [userPassword, setUserPassword] = useState<string>('')
   const [errorMessage, setErrorMessage] = useState<string>('')
-  const [opened, setOpened] = useState<boolean>(false)
+  const [submit, setSubmit] = useState<boolean>(false)
 
   const handleLoginWithGoogle = () => loginGoogle()
-  const handleLoginWithEmail = () => login({ email: userEmail, password: userPassword })
+  const handleLoginWithEmail = () => {
+    setSubmit(true)
+    login({ email: userEmail, password: userPassword, setErrorMessage: setErrorMessage })
+    console.log(localStorage.getItem('accessToken'))
+  }
 
   const handleEmailChange = debounce((event: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target
@@ -43,22 +41,12 @@ const LoginPage = () => {
     setUserPassword(value)
   }, 500)
 
-  console.log('user', userEmail)
-  console.log('password', userPassword)
-
-  useEffect(() => {
-    if (errorMessage) {
-      setOpened(true)
-    }
-  }, [errorMessage])
-
   if (localStorage.getItem('accessToken')) {
     return <Navigate to='/' />
   }
 
   return (
     <Container size={420} my={40}>
-      <ErrorModal opened={opened} message={errorMessage} setOpened={setOpened} />
       <Title
         align='center'
         sx={(theme) => ({
@@ -82,7 +70,6 @@ const LoginPage = () => {
           required
           onChange={handleEmailChange}
           name='email'
-          // eslint-disable-next-line jsx-a11y/no-autofocus
         />
         <PasswordInput
           label='Password'

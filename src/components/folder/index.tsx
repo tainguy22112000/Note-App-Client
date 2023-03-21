@@ -1,7 +1,6 @@
-import { Box, Card, Paper, ScrollArea, Stack, Title, Text } from '@mantine/core'
+import { Card, ScrollArea, Stack, Text } from '@mantine/core'
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { useStyles } from './index.style'
 
 interface FolderListProps {
   folders: {
@@ -11,7 +10,6 @@ interface FolderListProps {
 }
 
 const FolderList = ({ folders }: FolderListProps) => {
-  const { classes } = useStyles()
   return (
     <>
       <Text>Folder List</Text>

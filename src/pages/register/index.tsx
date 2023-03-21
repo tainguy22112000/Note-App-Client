@@ -1,28 +1,36 @@
 import { TextInput, PasswordInput, Paper, Title, Text, Container, Button, Stack } from '@mantine/core'
 import { Link, useNavigate } from 'react-router-dom'
 import { register } from '@/firebase/authenticate'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { debounce } from 'lodash'
 import ErrorModal from '@/components/errorModal'
 import { LOGIN_PATH } from '@/constants/routes'
+import { getAuth } from 'firebase/auth'
 
 const RegisterPage = () => {
   const navigate = useNavigate()
+  const auth = getAuth()
   const [userEmail, setUserEmail] = useState<string>('')
   const [userPassword, setUserPassword] = useState<string>('')
   const [userConfirmPassword, setUserConfirmPassword] = useState<string>('')
 
   const [errorMessage, setErrorMessage] = useState<string>('')
   const [opened, setOpened] = useState<boolean>(false)
+  const isEmailError = errorMessage.includes('email') ? errorMessage : ''
 
   const handleRegister = () => {
-    if (!userPassword.localeCompare(userConfirmPassword)) {
-      setErrorMessage('')
-      register({ email: userEmail, password: userPassword }, setErrorMessage)
-      setErrorMessage('Registered successfully')
-      navigate(LOGIN_PATH)
-    } else {
+    if (userPassword.localeCompare(userConfirmPassword)) {
       setErrorMessage('Confirm password is not valid')
+    } else {
+      register({ email: userEmail, password: userPassword }, setErrorMessage)
+
+      // eslint-disable-next-line no-extra-boolean-cast
+      if (auth.currentUser) {
+        console.log('register successfully')
+        setErrorMessage('Registered successfully')
+        setOpened(true)
+        navigate(LOGIN_PATH)
+      }
     }
   }
 
@@ -44,12 +52,6 @@ const RegisterPage = () => {
   console.log('error', errorMessage)
   console.log('user', userPassword)
   console.log('user', userConfirmPassword)
-
-  useEffect(() => {
-    if (errorMessage) {
-      setOpened(true)
-    }
-  }, [errorMessage])
 
   return (
     <Container size={420} my={40}>
@@ -74,8 +76,7 @@ const RegisterPage = () => {
           required
           onChange={handleEmailChange}
           name='email'
-          // eslint-disable-next-line jsx-a11y/no-autofocus
-          autoFocus={true}
+          error={isEmailError}
         />
         <PasswordInput
           label='Password'

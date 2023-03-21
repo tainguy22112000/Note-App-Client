@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { Auth, getAuth, User, UserInfo } from 'firebase/auth'
+import { getAuth, User, UserInfo } from 'firebase/auth'
 import { useNavigate } from 'react-router-dom'
 
 const initialAuthContext = {
@@ -12,17 +12,6 @@ export const AuthContext = createContext(initialAuthContext)
 interface AuthProviderProps {
   children: React.ReactNode
 }
-
-// interface UserInfoProps {
-//   accessToken: string
-//   displayName: string
-//   email: string
-//   emailVerified: boolean
-//   isAnonymous: boolean
-//   phoneNumber?: string
-//   photoURL?: string
-//   uid: string
-// }
 
 const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState(null)
