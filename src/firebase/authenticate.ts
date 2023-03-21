@@ -46,6 +46,7 @@ export const login = async ({ email, password, setErrorMessage }: LoginProps) =>
   const auth = getAuth()
   try {
     await signInWithEmailAndPassword(auth, email, password)
+    location.reload()
   } catch (err: any) {
     console.log(err.code)
     setErrorMessage('There was a problem logging in. Check your email and password or create an account.')
